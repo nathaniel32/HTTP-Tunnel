@@ -4,6 +4,8 @@ from websockets.client import ClientProtocol
 import json
 import httpx
 import logging
+import ssl
+import certifi
 from typing import AsyncGenerator
 from worker.config import WorkerConfig
 from common.models import MessageType, ProxyRequest, ResponseStart, ResponseChunk, ResponseEnd, ErrorMessage
@@ -113,6 +115,7 @@ class ProxyWorker:
         self.config = config
         self.handler = RequestHandler(config)
         self.running = False
+        self.ssl_context = ssl.create_default_context(cafile=certifi.where()) if config.proxy_server_url.startswith("wss://") else None
     
     async def start(self):
         """Start worker and maintain connection"""

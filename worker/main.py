@@ -36,7 +36,7 @@ class RequestHandler:
         headers = proxy_req.headers.copy()
         headers.pop("host", None)
         
-        url = f"{self.config.target_api_url}{proxy_req.path}"
+        url = f"{self.config.target_hostname}{proxy_req.path}"
         logger.info(f"Processing request {proxy_req.request_id}: {proxy_req.method} {url}")
         
         try:
@@ -136,7 +136,7 @@ class ProxyWorker:
         """Connect to proxy server and process messages"""
         async with websockets.connect(self.config.proxy_server_url) as websocket:
             logger.info(f"Connected to proxy server at {self.config.proxy_server_url}")
-            logger.info(f"Forwarding requests to {self.config.target_api_url}")
+            logger.info(f"Forwarding requests to {self.config.target_hostname}")
             
             async for message in websocket:
                 await self._handle_message(websocket, message)
@@ -184,18 +184,18 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Worker")
     parser.add_argument("--server-url", type=str)
-    parser.add_argument("--target-url", type=str)
+    parser.add_argument("--target-hostname", type=str)
     args = parser.parse_args()
 
     config = WorkerConfig()
 
     if args.server_url:
         config.proxy_server_url = args.server_url
-    if args.target_url:
-        config.target_api = args.target_url
+    if args.target_hostname:
+        config.target_hostname = args.target_hostname
 
     logging.info(f"Proxy Server: {config.proxy_server_url}")
-    logging.info(f"Target Server: {config.target_api_url}")
+    logging.info(f"Target Hostname: {config.target_hostname}")
     
     worker = ProxyWorker(config)
     
